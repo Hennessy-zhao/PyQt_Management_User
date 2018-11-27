@@ -2,9 +2,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from Manage_User_UI import Manage_User_UI
+from Manage_checkResult_UI import Manage_checkResult_UI
+from Manage_biologyMsg_UI import Manage_biologyMsg_UI
 import sys
 
-class Manage_UI(QObject):
+class Manage_UI(Manage_User_UI,Manage_checkResult_UI,Manage_biologyMsg_UI):
     def setupUI(self):
         self.setWindowTitle("管理界面")
         # 窗口的整体布局
@@ -39,99 +42,11 @@ class Manage_UI(QObject):
             self.item = QListWidgetItem(list_str[i], self.left_widget)
 
         # 添加用户管理模块右边栏
-        self.userManage()
+        self.setup_User_UI()
 
         # 添加检查汇总模块右边栏
-        self.checkResult()
+        self.setup_checkResult_UI()
 
         # 添加生物信息模块右边栏
-        self.biologyMsg()
+        self.setup_biologyMsg_UI()
 
-        # 用户管理模块具体内容
-
-    def userManage(self):
-        self.user_totalPage = 0
-        self.user_currentPage = 0
-        self.user_totalRecord = 0
-
-        self.body_user_manage = QWidget()
-        self.right_widget.addWidget(self.body_user_manage)
-        self.body_user_manage.setMinimumWidth(500)
-        style = '''
-                    *{
-                        font: 12pt \"微软雅黑\";
-                    }
-
-                    QLabel[name='body_user_label1']{
-                        font-size:14pt
-                    }
-
-                    QPushButton[name='body_user_btnAddUser']{
-                        padding:10px;
-                        font-size:11pt;
-                    }
-                '''
-        self.body_user_manage.setStyleSheet(style)
-
-        # 头部部分
-        top = QHBoxLayout()
-        label1 = QLabel("用户信息管理")
-        label1.setProperty('name', 'body_user_label1')
-        self.btn_addUser = QPushButton("添加新用户")
-        self.btn_addUser.setProperty('name', 'body_user_btnAddUser')
-        top.addWidget(label1, 0, Qt.AlignLeft)
-        top.addWidget(self.btn_addUser, 0, Qt.AlignRight)
-
-        # 查询部分
-        search = QHBoxLayout()
-        label2 = QLabel("查找账号：")
-        self.search_user = QLineEdit()
-        self.btn_search_user = QPushButton("Go")
-        search.addWidget(label2, 0, Qt.AlignLeft)
-        search.addWidget(self.search_user, 0, Qt.AlignLeft)
-        search.addWidget(self.btn_search_user, 0, Qt.AlignLeft)
-        spacerItem = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        search.addItem(spacerItem)
-
-        # 表格部分
-        tab_body = QWidget()
-        tab_body.setMinimumHeight(500)
-
-        # 底部
-        bottom = QHBoxLayout()
-        self.label_user_totalPage = QLabel("总共 " + str(self.user_totalPage) + " 页")
-        self.label_user_currentPage = QLabel("当前第 " + str(self.user_currentPage) + " 页")
-        self.btn_user_pre = QPushButton("上一页")
-        self.btn_user_next = QPushButton("下一页")
-        self.user_jump_page = QLineEdit()
-        self.label_user_totalRecord = QLabel("总共 " + str(self.user_totalRecord) + " 个用户")
-
-        bottom.addWidget(self.label_user_totalPage, 0, Qt.AlignLeft)
-        bottom.addWidget(self.label_user_currentPage, 0, Qt.AlignLeft)
-        bottom.addWidget(self.btn_user_pre)
-        bottom.addWidget(self.btn_user_next)
-        bottom.addWidget(QLabel("跳转到第"), 0, Qt.AlignLeft)
-        bottom.addWidget(self.user_jump_page)
-        bottom.addWidget(QLabel("页"), 0, Qt.AlignLeft)
-        bottom.addWidget(self.label_user_totalRecord, 0, Qt.AlignRight)
-
-        vlayout = QVBoxLayout()
-        vlayout.addLayout(top)
-        vlayout.addLayout(search)
-        vlayout.addWidget(tab_body)
-        vlayout.addLayout(bottom)
-        self.body_user_manage.setLayout(vlayout)
-
-        # 检查汇总模块具体内容
-
-    def checkResult(self):
-        self.body_checkResult = QWidget()
-        self.right_widget.addWidget(self.body_checkResult)
-        self.body_checkResult.setStyleSheet('background-color:green')
-
-        # 用户管理模块具体内容
-
-    def biologyMsg(self):
-        self.body_biologyMsg = QWidget()
-        self.right_widget.addWidget(self.body_biologyMsg)
-        self.body_biologyMsg.setStyleSheet('background-color:blue')
