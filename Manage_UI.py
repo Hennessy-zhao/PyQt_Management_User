@@ -20,6 +20,7 @@ class Manage_UI(Manage_User_UI,Manage_checkResult_UI,Manage_biologyMsg_UI):
         style = '''
                      QListWidget {             
                         max-width: 200px;
+                        min-width:200px;
                         font: 12pt \"微软雅黑\";
                      }
                      QListWidget::Item{

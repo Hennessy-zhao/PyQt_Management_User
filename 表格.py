@@ -39,11 +39,13 @@ class Demo(QWidget):
         print(user_list)
 
         #创建表格
-        self.user_table=QTableWidget(self)
-        self.user_table.setMinimumWidth(1000)
-        self.user_table.setMinimumHeight(1000)
+        self.layout=QHBoxLayout(self)
+        self.user_table=QTableWidget()
+        self.layout.addWidget(self.user_table)
+        # self.user_table.setMinimumWidth(1000)
+        # self.user_table.setMinimumHeight(1000)
         self.user_table.setColumnCount(6)
-        self.user_table.setRowCount(10)
+        self.user_table.setRowCount(15)
 
         #隐藏水平和垂直表头
         self.user_table.verticalHeader().setVisible(False)
@@ -79,14 +81,14 @@ class Demo(QWidget):
 
             self.btn_deleteUser=QPushButton("删除")
             self.user_table.setCellWidget(i+1,5,self.btn_deleteUser)
-       
+        print(self.user_table.geometry())
         #关闭数据库
         db.close()
 
 if __name__=='__main__':
     app=QApplication(sys.argv)
     form=Demo()
-    form.show()
+    form.showMaximized()
     sys.exit(app.exec_())
 
 
