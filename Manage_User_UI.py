@@ -8,9 +8,6 @@ import sys
 
 class Manage_User_UI(QObject):
     def setup_User_UI(self):
-        self.user_totalPage = 0
-        self.user_currentPage = 0
-        self.user_totalRecord = 0
 
         self.body_user_manage = QWidget()
         self.right_widget.addWidget(self.body_user_manage)
@@ -45,15 +42,23 @@ class Manage_User_UI(QObject):
 
         '''查询部分'''
         search = QHBoxLayout()
-        label2 = QLabel("查找账号：")
-        self.search_user = QLineEdit()
-        self.btn_search_user = QPushButton("查找")
-        spacerItem1 = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        label2 = QLabel("账号查询：")
+        self.search_userID = QLineEdit()
+        self.btn_search_userID = QPushButton("查找")
+        spacerItem1 = QtWidgets.QSpacerItem(30, 0, QtWidgets.QSizePolicy.Minimum,QtWidgets.QSizePolicy.Minimum)
+        label3=QLabel("姓名查询：")
+        self.search_username=QLineEdit()
+        self.btn_search_username=QPushButton("查找")
+        spacerItem2 = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         search.addWidget(label2, 0, Qt.AlignLeft)
-        search.addWidget(self.search_user, 0, Qt.AlignLeft)
-        search.addWidget(self.btn_search_user, 0, Qt.AlignLeft)
+        search.addWidget(self.search_userID, 0, Qt.AlignLeft)
+        search.addWidget(self.btn_search_userID, 0, Qt.AlignLeft)
         search.addItem(spacerItem1)
+        search.addWidget(label3, 0, Qt.AlignLeft)
+        search.addWidget(self.search_username, 0, Qt.AlignLeft)
+        search.addWidget(self.btn_search_username, 0, Qt.AlignLeft)
+        search.addItem(spacerItem2)
 
         '''表格部分'''
         tab_body = QVBoxLayout()
@@ -116,54 +121,27 @@ class Manage_User_UI(QObject):
         self.user_table.setItem(0, 4, text4)
         self.user_table.setItem(0, 5, text5)
 
-        # 把数据库中信息放入表格
-        self.user_updateTable()
-        '''
-        print(len(user_list))
-        for i in range(len(user_list)):
-            print(user_list[i][0])
-            text1=QTableWidgetItem(user_list[i][0])
-            text1.setTextAlignment(Qt.AlignCenter)
-            text2=QTableWidgetItem(user_list[i][1])
-            text2.setTextAlignment(Qt.AlignCenter)
-
-            self.user_table.setItem(i + 1, 0,text1)
-            self.user_table.setItem(i + 1, 1, text2)
-            if user_list[i][2] == 0:
-                text3=QTableWidgetItem('管理员')
-                text3.setTextAlignment(Qt.AlignCenter)
-                self.user_table.setItem(i + 1, 2, text3)
-            else:
-                text3 = QTableWidgetItem('操作员')
-                text3.setTextAlignment(Qt.AlignCenter)
-                self.user_table.setItem(i + 1, 2, text3)
-
-            self.btn_changeLevel = QPushButton("修改")
-            self.user_table.setCellWidget(i + 1, 3, self.btn_changeLevel)
-
-            self.btn_checkTime = QPushButton("查看")
-            self.user_table.setCellWidget(i + 1, 4, self.btn_checkTime)
-
-            self.btn_deleteUser = QPushButton("删除")
-            self.user_table.setCellWidget(i + 1, 5, self.btn_deleteUser)
-        '''
-
-        # 关闭数据库
-        db.close()
         tab_body.addWidget(self.user_table)
 
 
 
         '''底部'''
+        # 获取用户总个数
+        self.user_listCount = self.get_user_listCount()
+
+        # 获取总页数
+        self.user_pageCount = int(self.user_listCount / 10 + 1)
+
+
         bottom = QHBoxLayout()
-        self.label_user_totalPage = QLabel("总共 " + str(self.user_totalPage) + " 页")
+        self.label_user_totalPage = QLabel("总共 " + str(self.user_pageCount) + " 页")
         self.label_user_currentPage = QLabel("当前第 " + str(self.user_currentPage) + " 页")
         self.btn_user_pre = QPushButton("上一页")
         self.btn_user_next = QPushButton("下一页")
         self.user_jump_page = QLineEdit()
         self.user_jump_page.setMaximumWidth(80)
-        self.btn_searchPage=QPushButton("跳转")
-        self.label_user_totalRecord = QLabel("总共 " + str(self.user_totalRecord) + " 个用户")
+        self.btn_user_searchPage=QPushButton("跳转")
+        self.label_user_totalRecord = QLabel("总共 " + str(self.user_listCount) + " 个用户")
         spacerItem2 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         spacerItem3 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         spacerItem4 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -179,7 +157,7 @@ class Manage_User_UI(QObject):
         bottom.addWidget(QLabel("跳转到第"), 0, Qt.AlignLeft)
         bottom.addWidget(self.user_jump_page)
         bottom.addWidget(QLabel("页"), 0, Qt.AlignLeft)
-        bottom.addWidget(self.btn_searchPage)
+        bottom.addWidget(self.btn_user_searchPage)
         bottom.addItem(spacerItem5)
         bottom.addWidget(self.label_user_totalRecord, 0, Qt.AlignRight)
 
@@ -189,6 +167,27 @@ class Manage_User_UI(QObject):
         vlayout.addLayout(tab_body)
         vlayout.addLayout(bottom)
         self.body_user_manage.setLayout(vlayout)
+
+        # 把数据库中信息放入表格
+        self.user_updateTable()
+
+        #上一页按钮被按下
+        self.btn_user_pre.clicked.connect(self.userPreButtonOnClick)
+
+        #下一页按钮被按下
+        self.btn_user_next.clicked.connect(self.userNextButtonOnClick)
+
+        #跳转页面按钮被按下
+        self.btn_user_searchPage.clicked.connect(self.userSearchPageOnClick)
+
+        #搜索账号按钮被按下
+        self.btn_search_userID.clicked.connect(self.userSearchIdOnClick)
+
+        #搜索姓名账号被按下
+        self.btn_search_username.clicked.connect(self.userSearchNameOnClick)
+
+
+
 
 
 
