@@ -31,6 +31,7 @@ class Manage_User_UI(QObject):
                 '''
         self.body_user_manage.setStyleSheet(style)
 
+
         '''头部部分'''
         top = QHBoxLayout()
         label1 = QLabel("用户信息管理")
@@ -41,6 +42,16 @@ class Manage_User_UI(QObject):
         top.addWidget(self.btn_addUser, 0, Qt.AlignRight)
 
         '''查询部分'''
+        # self.user_regain=QLabel()
+        # self.user_regain.setPixmap(QPixmap('./images/regain.png'))
+        #令label中的图片自适应label大小
+        #self.user_regain.setScaledContents(True)
+        #self.user_regain.setToolTip("点击回到原始状态")
+        #self.user_regain.setMaximumSize(30,30)
+        self.btn_user_regain = QPushButton()
+        self.btn_user_regain.setIcon(QIcon(QPixmap('./images/regain.png')))
+        self.btn_user_regain.setIconSize(QSize(30,30))
+        spacerItem0 = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         search = QHBoxLayout()
         label2 = QLabel("账号查询：")
         self.search_userID = QLineEdit()
@@ -51,6 +62,8 @@ class Manage_User_UI(QObject):
         self.btn_search_username=QPushButton("查找")
         spacerItem2 = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
+        search.addWidget(self.btn_user_regain,0,Qt.AlignLeft)
+        search.addItem(spacerItem0)
         search.addWidget(label2, 0, Qt.AlignLeft)
         search.addWidget(self.search_userID, 0, Qt.AlignLeft)
         search.addWidget(self.btn_search_userID, 0, Qt.AlignLeft)
@@ -130,7 +143,10 @@ class Manage_User_UI(QObject):
         self.user_listCount = self.get_user_listCount()
 
         # 获取总页数
-        self.user_pageCount = int(self.user_listCount / 10 + 1)
+        if self.user_listCount==10:
+            self.user_pageCount=1
+        else:
+            self.user_pageCount = int(self.user_listCount / 10 + 1)
 
 
         bottom = QHBoxLayout()
@@ -138,8 +154,15 @@ class Manage_User_UI(QObject):
         self.label_user_currentPage = QLabel("当前第 " + str(self.user_currentPage) + " 页")
         self.btn_user_pre = QPushButton("上一页")
         self.btn_user_next = QPushButton("下一页")
+        #设置跳转页输入框
         self.user_jump_page = QLineEdit()
         self.user_jump_page.setMaximumWidth(80)
+        #只能输入数字
+        userJumpPage_reg=QRegExp("^-?\d+$")
+        userJumpPage_Validator=QRegExpValidator(self)
+        userJumpPage_Validator.setRegExp(userJumpPage_reg)
+        self.user_jump_page.setValidator(userJumpPage_Validator)
+        #设置跳转按钮
         self.btn_user_searchPage=QPushButton("跳转")
         self.label_user_totalRecord = QLabel("总共 " + str(self.user_listCount) + " 个用户")
         spacerItem2 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -171,6 +194,9 @@ class Manage_User_UI(QObject):
         # 把数据库中信息放入表格
         self.user_updateTable()
 
+        #regain按钮--即回到原状态按钮被按下
+        self.btn_user_regain.clicked.connect(self.userRegainButtonOnClick)
+
         #上一页按钮被按下
         self.btn_user_pre.clicked.connect(self.userPreButtonOnClick)
 
@@ -185,9 +211,5 @@ class Manage_User_UI(QObject):
 
         #搜索姓名账号被按下
         self.btn_search_username.clicked.connect(self.userSearchNameOnClick)
-
-
-
-
 
 
