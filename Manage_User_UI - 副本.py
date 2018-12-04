@@ -9,8 +9,6 @@ import sys
 class Manage_User_UI(QObject):
     def setup_User_UI(self):
 
-
-
         self.body_user_manage = QWidget()
         self.right_widget.addWidget(self.body_user_manage)
         self.body_user_manage.setMinimumWidth(500)
@@ -27,10 +25,7 @@ class Manage_User_UI(QObject):
                         padding:10px;
                         font-size:11pt;
                     }
-                    QLabel[name='body_user_describe']{
-                        margin-top:15px;
-                        margin-bottom:10px;
-                    }
+                    
                    
                     
                 '''
@@ -47,6 +42,12 @@ class Manage_User_UI(QObject):
         top.addWidget(self.btn_addUser, 0, Qt.AlignRight)
 
         '''查询部分'''
+        # self.user_regain=QLabel()
+        # self.user_regain.setPixmap(QPixmap('./images/regain.png'))
+        #令label中的图片自适应label大小
+        #self.user_regain.setScaledContents(True)
+        #self.user_regain.setToolTip("点击回到原始状态")
+        #self.user_regain.setMaximumSize(30,30)
         self.btn_user_regain = QPushButton()
         self.btn_user_regain.setIcon(QIcon(QPixmap('./images/regain.png')))
         self.btn_user_regain.setIconSize(QSize(30,30))
@@ -86,12 +87,10 @@ class Manage_User_UI(QObject):
             return False
 
         # 建设初始化表格，即
-        #self.user_recordQuery(0,10)
+        self.user_recordQuery(0,10)
         #print(self.user_list)
         # 创建表格
 
-        self.user_describe=QLabel("以下为所有用户的信息")
-        self.user_describe.setProperty('name', 'body_user_describe')
         self.user_table = QTableWidget()
 
         screen = QDesktopWidget().screenGeometry()
@@ -135,16 +134,24 @@ class Manage_User_UI(QObject):
         self.user_table.setItem(0, 4, text4)
         self.user_table.setItem(0, 5, text5)
 
-        tab_body.addWidget(self.user_describe)
         tab_body.addWidget(self.user_table)
 
 
 
         '''底部'''
+        # 获取用户总个数
+        self.user_listCount = self.get_user_listCount()
+
+        # 获取总页数
+        if self.user_listCount==10:
+            self.user_pageCount=1
+        else:
+            self.user_pageCount = int(self.user_listCount / 10 + 1)
+
 
         bottom = QHBoxLayout()
-        self.label_user_totalPage = QLabel("总共 " + ' ' + " 页")
-        self.label_user_currentPage = QLabel("当前第 " + ' ' + " 页")
+        self.label_user_totalPage = QLabel("总共 " + str(self.user_pageCount) + " 页")
+        self.label_user_currentPage = QLabel("当前第 " + str(self.user_currentPage) + " 页")
         self.btn_user_pre = QPushButton("上一页")
         self.btn_user_next = QPushButton("下一页")
         #设置跳转页输入框
@@ -157,7 +164,7 @@ class Manage_User_UI(QObject):
         self.user_jump_page.setValidator(userJumpPage_Validator)
         #设置跳转按钮
         self.btn_user_searchPage=QPushButton("跳转")
-        self.label_user_totalRecord = QLabel("总共 " + '' + " 个用户")
+        self.label_user_totalRecord = QLabel("总共 " + str(self.user_listCount) + " 个用户")
         spacerItem2 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         spacerItem3 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         spacerItem4 = QtWidgets.QSpacerItem(20, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -184,7 +191,8 @@ class Manage_User_UI(QObject):
         vlayout.addLayout(bottom)
         self.body_user_manage.setLayout(vlayout)
 
-        self.btn_addUser.clicked.connect(self.showAddUserDialog)
+        # 把数据库中信息放入表格
+        self.user_updateTable()
 
         #regain按钮--即回到原状态按钮被按下
         self.btn_user_regain.clicked.connect(self.userRegainButtonOnClick)
@@ -204,31 +212,4 @@ class Manage_User_UI(QObject):
         #搜索姓名账号被按下
         self.btn_search_username.clicked.connect(self.userSearchNameOnClick)
 
-    #显示添加新用户的界面
-    def showAddUserDialog(self):
-        dialog=QDialog()
 
-        # 设置logo
-        dialog.setWindowIcon(QIcon('./images/logo.png'))
-
-        dialog.setWindowTitle("添加新用户")
-        dialog.setWindowModality(Qt.WindowModal)    #设置窗口模态：窗口模态，程序在未处理完当前对话框时，将阻止和对话框的父窗口进行交互
-
-        vlayout=QVBoxLayout()
-
-        '''头部标题信息'''
-        vlayout.addWidget(QLabel("添加一个新用户信息"),Qt.AlignCenter | Qt.AlignTop)
-
-        #添加用户id
-        id_layout=QHBoxLayout()
-        user_id=QLineEdit()
-        user_id_icon=QLabel()
-        user_id_msg=QLabel()
-
-        id_layout.addWidget(user_id)
-        
-
-        vlayout.addLayout(id_layout)
-        dialog.setLayout(vlayout)
-
-        dialog.exec_()
