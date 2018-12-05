@@ -124,7 +124,7 @@ class Manage_User_UI(QObject):
         text2.setTextAlignment(Qt.AlignCenter)
         text3 = QTableWidgetItem("修改权限")
         text3.setTextAlignment(Qt.AlignCenter)
-        text4 = QTableWidgetItem("在线时间")
+        text4 = QTableWidgetItem("操作流水")
         text4.setTextAlignment(Qt.AlignCenter)
         text5 = QTableWidgetItem("删除")
         text5.setTextAlignment(Qt.AlignCenter)
@@ -208,8 +208,23 @@ class Manage_User_UI(QObject):
     def showAddUserDialog(self):
         dialog=QDialog()
 
+        style = '''
+                *{
+                    font-size:12pt;
+                    font: 12pt \"微软雅黑\";
+                }
+                
+                QPushButton[name='body_user_btnAddUser']{
+                    padding:10px 8px;
+                    font-size:11pt;
+                }
+
+                '''
+        dialog.setStyleSheet(style)
+
+
         # 设置logo
-        dialog.setWindowIcon(QIcon('./images/logo.png'))
+        dialog.setWindowIcon(QIcon('./images/logo_1.png'))
 
         dialog.setWindowTitle("添加新用户")
         dialog.setWindowModality(Qt.WindowModal)    #设置窗口模态：窗口模态，程序在未处理完当前对话框时，将阻止和对话框的父窗口进行交互
@@ -217,18 +232,85 @@ class Manage_User_UI(QObject):
         vlayout=QVBoxLayout()
 
         '''头部标题信息'''
-        vlayout.addWidget(QLabel("添加一个新用户信息"),Qt.AlignCenter | Qt.AlignTop)
+        label1=QLabel("添加一个新用户信息")
+        label1.setAlignment(Qt.AlignCenter)
+        vlayout.addWidget(label1,Qt.AlignCenter)
 
         #添加用户id
         id_layout=QHBoxLayout()
-        user_id=QLineEdit()
-        user_id_icon=QLabel()
-        user_id_msg=QLabel()
+        id_layout.setSpacing(20)
+        id_layout.setContentsMargins(10,20,10,10)
+        self.user_addid=QLineEdit()
+        self.user_addid.setMinimumWidth(150)
+        self.user_addid_icon=QLabel()
+        self.user_addid_icon.setAlignment(Qt.AlignRight)
+        self.user_addid_icon.setPixmap(QPixmap("./images/yes_1.png"))
+        self.user_addid_msg=QLabel("该账号已存在")
+        self.user_addid_msg.setMinimumWidth(200)
+        self.user_addid_msg.setMaximumWidth(200)
 
-        id_layout.addWidget(user_id)
-        
+        id_layout.addWidget(QLabel("账号："),Qt.AlignLeft)
+        id_layout.addWidget(self.user_addid,Qt.AlignLeft)
+        id_layout.addWidget(self.user_addid_icon,Qt.AlignLeft)
+        id_layout.addWidget(self.user_addid_msg,Qt.AlignLeft)
+
+        # 添加用户姓名
+        name_layout = QHBoxLayout()
+        name_layout.setSpacing(20)
+        name_layout.setContentsMargins(10,10,10,10)
+        self.user_addname = QLineEdit()
+        self.user_addname.setMinimumWidth(150)
+        self.user_addname_icon = QLabel()
+        self.user_addname_icon.setAlignment(Qt.AlignRight)
+        self.user_addname_icon.setPixmap(QPixmap("./images/yes_1.png"))
+        self.user_addname_msg = QLabel("姓名格式正确")
+        self.user_addname_msg.setMinimumWidth(200)
+        self.user_addname_msg.setMaximumWidth(200)
+
+        name_layout.addWidget(QLabel("姓名："),Qt.AlignLeft)
+        name_layout.addWidget(self.user_addname,Qt.AlignLeft)
+        name_layout.addWidget(self.user_addname_icon,Qt.AlignLeft)
+        name_layout.addWidget(self.user_addname_msg,Qt.AlignRight)
+
+        #添加用户权限
+        level_layout=QHBoxLayout()
+        level_layout.setSpacing(20)
+        level_layout.setContentsMargins(10,10,10,10)
+        self.user_add_level_1=QRadioButton("管理员")
+        self.user_add_level_2=QRadioButton("操作员")
+        self.user_add_level_2.setChecked(True)
+        user_addLevel_icon=QLabel()
+        user_addLevel_icon.setAlignment(Qt.AlignRight)
+        user_addLevel_icon.setPixmap(QPixmap("./images/warn_1.png"))
+        user_addLevel_msg=QLabel("管理员: 可以登录后台系统和检测系统；\n操作员：只能登录检测系统")
+        user_addLevel_msg.setMaximumWidth(200)
+        user_addLevel_msg.setMinimumWidth(200)
+        user_addLevel_msg.setWordWrap(True)
+
+        level_layout.addWidget(QLabel("姓名："),Qt.AlignLeft)
+        level_layout.addWidget(self.user_add_level_1,Qt.AlignLeft)
+        level_layout.addWidget(self.user_add_level_2,Qt.AlignLeft)
+        level_layout.addWidget(user_addLevel_icon,Qt.AlignLeft)
+        level_layout.addWidget(user_addLevel_msg,Qt.AlignRight)
+
+        #添加提交和清空
+        btn_layout=QHBoxLayout()
+        btn_layout.setSpacing(20)
+        btn_layout.setContentsMargins(10, 10, 10, 10)
+        btn_addUser=QPushButton("添加")
+        btn_addUser.setProperty('name', 'body_user_btnAddUser')
+        btn_addUser.setMaximumWidth(100)
+        btn_reset=QPushButton("清空")
+        btn_reset.setProperty('name', 'body_user_btnAddUser')
+        btn_reset.setMaximumWidth(100)
+
+        btn_layout.addWidget(btn_addUser,Qt.AlignCenter)
+        btn_layout.addWidget(btn_reset,Qt.AlignCenter)
 
         vlayout.addLayout(id_layout)
+        vlayout.addLayout(name_layout)
+        vlayout.addLayout(level_layout)
+        vlayout.addLayout(btn_layout)
         dialog.setLayout(vlayout)
 
         dialog.exec_()

@@ -11,7 +11,7 @@ class Manage_UI(Manage_User_UI,Manage_checkResult_UI,Manage_biologyMsg_UI):
     def setupUI(self):
         self.setWindowTitle("管理界面")
         # 设置软件logo
-        self.setWindowIcon(QIcon('./images/logo.png'))
+        self.setWindowIcon(QIcon('./images/logo_1.png'))
         # 窗口的整体布局
         self.main_layout = QHBoxLayout(self, spacing=0)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
