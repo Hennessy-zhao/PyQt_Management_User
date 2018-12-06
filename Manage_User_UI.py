@@ -205,7 +205,9 @@ class Manage_User_UI(QObject):
         self.btn_search_username.clicked.connect(self.userSearchNameOnClick)
 
         #查看权限不同的用户
-        self.btn_selectLevel.currentIndexChanged.connect(self.userSelectLevelOnClick)
+        #self.btn_selectLevel.currentIndexChanged.connect(self.userSelectLevelOnClick)
+        self.btn_selectLevel.activated.connect(self.userSelectLevelOnClick)
+
 
     #显示添加新用户的界面
     def showAddUserDialog(self):

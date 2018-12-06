@@ -24,6 +24,7 @@ class Demo(QWidget,Manage_UI):
         self.user_searchID_content=''   #查询的ID名称
         self.is_user_searchName=False   #是否正在进行模糊查询名字操作
         self.user_searchName_content='' #查询的Name名称
+        self.user_searchLevel_num=None  #目前查询是否有关level
 
         #显示界面样式
         self.setupUI()
@@ -34,7 +35,7 @@ class Demo(QWidget,Manage_UI):
     '''用户部分操作'''
 
     # 刷新界面-把数据库中的信息展示在用户界面上
-    def user_update(self,start_s=0,count_s=10,level=None):
+    def user_update(self,start_s=0,count_s=10):
         if self.is_user_searchID:
             self.user_recordQuery(start=start_s,count=count_s,field='id',content=self.user_searchID_content)
             # 获得总数据数
@@ -105,12 +106,21 @@ class Demo(QWidget,Manage_UI):
             self.btn_user_pre.setEnabled(True)
 
     # 搜索数据库中相应数据
-    def user_recordQuery(self, start,count,field=None,content=None,level=None):
+    def user_recordQuery(self, start,count,field=None,content=None):
         if field:
-            sql = "select * from user where " + field + " like \'%" + content + "%\' limit " + str(start) + "," + str(count)
+            if self.user_searchLevel_num!=None:
+                level=self.user_searchLevel_num
+                sql = "select * from user where level="+str(level)+" and " + field + " like \'%" + content + "%\' limit " + str(
+                    start) + "," + str(count)
+            else:
+                sql = "select * from user where " + field + " like \'%" + content + "%\' limit " + str(start) + "," + str(count)
             query = QtSql.QSqlQuery(sql)
         else:
-            query = QtSql.QSqlQuery('select * from user limit %d,%d' % (start, count))
+            if self.user_searchLevel_num!=None:
+                level=self.user_searchLevel_num
+                query = QtSql.QSqlQuery('select * from user where level=%d limit %d,%d' % (level,start, count))
+            else:
+                query = QtSql.QSqlQuery('select * from user limit %d,%d' % (start, count))
         self.user_list=None
         self.user_list=list()
         query.first()
@@ -128,6 +138,9 @@ class Demo(QWidget,Manage_UI):
     def userRegainButtonOnClick(self):
         #修改提示label
         self.user_describe.setText("以下为所有用户的信息")
+        #level级别设置为None
+        self.btn_selectLevel.setCurrentIndex(0)
+        self.user_searchLevel_num=None
         #还原状态，则模糊查询ID和Name的状态为False
         self.is_user_searchID=False
         self.is_user_searchName = False
@@ -145,9 +158,16 @@ class Demo(QWidget,Manage_UI):
     #获取总数据数
     def get_user_listCount(self,field=None,content=None):
         if field:
-            query = QtSql.QSqlQuery("select * from user where "+field +" like \'%"+content+"%\'")
+            if self.user_searchLevel_num!=None:
+                level=self.user_searchLevel_num
+                query = QtSql.QSqlQuery("select * from user where level="+str(level)+" and " + field + " like \'%" + content + "%\'")
+            else:
+                query = QtSql.QSqlQuery("select * from user where "+field +" like \'%"+content+"%\'")
         else:
-            query = QtSql.QSqlQuery("select * from user")
+            if self.user_searchLevel_num!=None:
+                query = QtSql.QSqlQuery("select * from user where level=%d"%self.user_searchLevel_num)
+            else:
+                query = QtSql.QSqlQuery("select * from user")
 
         return query.numRowsAffected()
 
@@ -202,6 +222,8 @@ class Demo(QWidget,Manage_UI):
 
     # 搜索账号按钮被按下
     def userSearchIdOnClick(self):
+        self.btn_selectLevel.setCurrentIndex(0)
+        self.user_searchLevel_num = None
         self.is_user_searchID=True
         self.is_user_searchName=False
         userID=self.search_userID.text()
@@ -215,6 +237,8 @@ class Demo(QWidget,Manage_UI):
 
     # 搜索姓名账号被按下
     def userSearchNameOnClick(self):
+        self.btn_selectLevel.setCurrentIndex(0)
+        self.user_searchLevel_num=None
         self.is_user_searchID = False
         self.is_user_searchName = True
         userName = self.search_username.text()
@@ -228,11 +252,13 @@ class Demo(QWidget,Manage_UI):
     #根据权限查看用户
     def userSelectLevelOnClick(self,i):
         if i==1:
-            self.user_update(start_s=0, count_s=10,level=0)
+            self.user_searchLevel_num=0
         elif i==2:
-            self.user_update(start_s=0, count_s=10,level=1)
+            self.user_searchLevel_num=1
         else:
-            self.user_update(start_s=0, count_s=10)
+            self.user_searchLevel_num=None
+
+        self.user_update(start_s=0, count_s=10)
 
 
 
