@@ -204,6 +204,9 @@ class Manage_User_UI(QObject):
         #搜索姓名账号被按下
         self.btn_search_username.clicked.connect(self.userSearchNameOnClick)
 
+        #查看权限不同的用户
+        self.btn_selectLevel.currentIndexChanged.connect(self.userSelectLevelOnClick)
+
     #显示添加新用户的界面
     def showAddUserDialog(self):
         dialog=QDialog()
@@ -215,7 +218,7 @@ class Manage_User_UI(QObject):
                 }
                 
                 QPushButton[name='body_user_btnAddUser']{
-                    padding:10px 8px;
+                    padding:5px 5px;
                     font-size:11pt;
                 }
 
@@ -244,8 +247,9 @@ class Manage_User_UI(QObject):
         self.user_addid.setMinimumWidth(150)
         self.user_addid_icon=QLabel()
         self.user_addid_icon.setAlignment(Qt.AlignRight)
-        self.user_addid_icon.setPixmap(QPixmap("./images/yes_1.png"))
-        self.user_addid_msg=QLabel("该账号已存在")
+        #self.user_addid_icon.setPixmap(QPixmap("./images/yes_1.png"))
+        #self.user_addid_msg=QLabel("该账号已存在")
+        self.user_addid_msg = QLabel("")
         self.user_addid_msg.setMinimumWidth(200)
         self.user_addid_msg.setMaximumWidth(200)
 
@@ -262,8 +266,9 @@ class Manage_User_UI(QObject):
         self.user_addname.setMinimumWidth(150)
         self.user_addname_icon = QLabel()
         self.user_addname_icon.setAlignment(Qt.AlignRight)
-        self.user_addname_icon.setPixmap(QPixmap("./images/yes_1.png"))
-        self.user_addname_msg = QLabel("姓名格式正确")
+        #self.user_addname_icon.setPixmap(QPixmap("./images/yes_1.png"))
+        #self.user_addname_msg = QLabel("姓名格式正确")
+        self.user_addname_msg = QLabel("")
         self.user_addname_msg.setMinimumWidth(200)
         self.user_addname_msg.setMaximumWidth(200)
 
@@ -297,14 +302,14 @@ class Manage_User_UI(QObject):
         btn_layout=QHBoxLayout()
         btn_layout.setSpacing(20)
         btn_layout.setContentsMargins(10, 10, 10, 10)
-        btn_addUser=QPushButton("添加")
-        btn_addUser.setProperty('name', 'body_user_btnAddUser')
-        btn_addUser.setMaximumWidth(100)
+        self.btn_addnewuser=QPushButton("添加")
+        self.btn_addnewuser.setProperty('name', 'body_user_btnAddUser')
+        self.btn_addnewuser.setMaximumWidth(100)
         btn_reset=QPushButton("清空")
         btn_reset.setProperty('name', 'body_user_btnAddUser')
         btn_reset.setMaximumWidth(100)
 
-        btn_layout.addWidget(btn_addUser,Qt.AlignCenter)
+        btn_layout.addWidget(self.btn_addnewuser,Qt.AlignCenter)
         btn_layout.addWidget(btn_reset,Qt.AlignCenter)
 
         vlayout.addLayout(id_layout)
@@ -312,5 +317,18 @@ class Manage_User_UI(QObject):
         vlayout.addLayout(level_layout)
         vlayout.addLayout(btn_layout)
         dialog.setLayout(vlayout)
+
+        #验证id是否重复
+        self.user_addid.textChanged.connect(self.user_verify_id)
+
+        #验证name是否符合规范
+        self.user_addname.textChanged.connect(self.user_verify_name)
+
+        #清空按钮被按下
+        btn_reset.clicked.connect(self.reset_AddUserDialog)
+
+        #添加按钮被按下
+        self.btn_addnewuser.clicked.connect(self.addnewuserButtonOnClick)
+
 
         dialog.exec_()

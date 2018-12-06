@@ -7,6 +7,7 @@ from PyQt5 import QtSql
 from Manage_UI import Manage_UI
 import sys
 import qdarkstyle
+import re
 
 class Demo(QWidget,Manage_UI):
     def __init__(self,parent=None):
@@ -33,7 +34,7 @@ class Demo(QWidget,Manage_UI):
     '''用户部分操作'''
 
     # 刷新界面-把数据库中的信息展示在用户界面上
-    def user_update(self,start_s=0,count_s=10):
+    def user_update(self,start_s=0,count_s=10,level=None):
         if self.is_user_searchID:
             self.user_recordQuery(start=start_s,count=count_s,field='id',content=self.user_searchID_content)
             # 获得总数据数
@@ -104,7 +105,7 @@ class Demo(QWidget,Manage_UI):
             self.btn_user_pre.setEnabled(True)
 
     # 搜索数据库中相应数据
-    def user_recordQuery(self, start,count,field=None,content=None):
+    def user_recordQuery(self, start,count,field=None,content=None,level=None):
         if field:
             sql = "select * from user where " + field + " like \'%" + content + "%\' limit " + str(start) + "," + str(count)
             query = QtSql.QSqlQuery(sql)
@@ -188,7 +189,9 @@ class Demo(QWidget,Manage_UI):
         page_count=self.get_user_pageCount()
 
         if page<1 or page > page_count:
-            QMessageBox.warning(self,'输入有误','您输入的页数超过了范围',QMessageBox.Ok)
+            box = QMessageBox(QMessageBox.Warning, "输入有误", "您输入的页数超过了范围")
+            box.addButton(self.tr("确定"), QMessageBox.YesRole)
+            box.exec_()
             return False
         start = int(page-1) * 10
         #print(start)
@@ -220,6 +223,85 @@ class Demo(QWidget,Manage_UI):
         # 修改当前页数
         self.user_currentPage = 1
         self.user_update(start_s=0, count_s=10)
+
+
+    #根据权限查看用户
+    def userSelectLevelOnClick(self,i):
+        if i==1:
+            self.user_update(start_s=0, count_s=10,level=0)
+        elif i==2:
+            self.user_update(start_s=0, count_s=10,level=1)
+        else:
+            self.user_update(start_s=0, count_s=10)
+
+
+
+    ''' 添加新用户部分操作 '''
+    #验证id是否重复
+    def user_verify_id(self,text):
+        sql = "select * from user where id ='"+text+"'"
+        query = QtSql.QSqlQuery(sql)
+
+        if text =='':
+            self.user_addid_icon.setPixmap(QPixmap(""))
+            self.user_addid_msg.setText('')
+        else:
+            match = re.search("^[0-9]*$", text)
+            if query.numRowsAffected() > 0:
+                self.user_addid_icon.setPixmap(QPixmap("./images/no_1.png"))
+                self.user_addid_msg.setText("账号已存在")
+            elif not match:
+                self.user_addid_icon.setPixmap(QPixmap("./images/no_1.png"))
+                self.user_addid_msg.setText("账号不符合规范")
+            else :
+                self.user_addid_icon.setPixmap(QPixmap("./images/yes_1.png"))
+                self.user_addid_msg.setText('')
+
+
+    #验证name是否符合姓名规范
+    def user_verify_name(self,text):
+        if text=='':
+            self.user_addname_icon.setPixmap(QPixmap(""))
+            self.user_addname_msg.setText('')
+        else:
+            match = re.search("^[\u4E00-\u9FA5\uf900-\ufa2d·s]{2,20}$", text)
+            if not match:
+                self.user_addname_icon.setPixmap(QPixmap("./images/no_1.png"))
+                self.user_addname_msg.setText("姓名不符合规范")
+            else:
+                self.user_addname_icon.setPixmap(QPixmap("./images/yes_1.png"))
+                self.user_addname_msg.setText('')
+
+
+    #清空AddUserDialog按钮被按下
+    def reset_AddUserDialog(self):
+        self.user_addid.setText('')
+        self.user_addname.setText('')
+        self.user_add_level_2.setChecked(True)
+
+
+    #添加新用户的按钮被按下
+    def addnewuserButtonOnClick(self):
+        reply=QMessageBox(QMessageBox.Question, "是否添加用户", "您确定添加该用户吗？？")
+        qyes=reply.addButton(self.tr("确定"),QMessageBox.YesRole)
+        qno=reply.addButton(self.tr("取消"),QMessageBox.NoRole)
+        reply.exec_()
+        if reply.clickedButton()==qyes:
+            new_id=self.user_addid.text()
+            new_name=self.user_addname.text()
+
+            if self.user_add_level_1.isChecked()==True:
+                new_level=0
+            else:
+                new_level=1
+
+        sql = "insert into user values(\'"+new_id+"\',\'"+new_name+"\',"+str(new_level)+")"
+        query = QtSql.QSqlQuery(sql)
+        if query.numRowsAffected() > 0:
+            self.user_update(start_s=0, count_s=10)
+            box = QMessageBox(QMessageBox.Information, "添加成功", "您已成功添加用户")
+            box.addButton(self.tr("确定"), QMessageBox.YesRole)
+            box.exec_()
 
 
 if __name__=='__main__':
