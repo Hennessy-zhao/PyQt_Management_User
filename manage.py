@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtSql import *
 from PyQt5 import QtSql
+from functools import partial
 from Manage_UI import Manage_UI
 import sys
 import qdarkstyle
@@ -87,15 +88,22 @@ class Demo(QWidget,Manage_UI):
                 text3 = QTableWidgetItem('操作员')
                 text3.setTextAlignment(Qt.AlignCenter)
                 self.user_table.setItem(i + 1, 2, text3)
+            #以下是循环显示按钮的界面
 
             self.btn_changeLevel = QPushButton("修改")
             self.user_table.setCellWidget(i + 1, 3, self.btn_changeLevel)
+
+            self.btn_changeLevel.clicked.connect(partial(self.showChangeUserLevelDialog, self.user_list[i][0],self.user_list[i][1],self.user_list[i][2]))
 
             self.btn_checkTime = QPushButton("查看")
             self.user_table.setCellWidget(i + 1, 4, self.btn_checkTime)
 
             self.btn_deleteUser = QPushButton("删除")
             self.user_table.setCellWidget(i + 1, 5, self.btn_deleteUser)
+
+            self.btn_deleteUser.clicked.connect(partial(self.userDeleteButtonOnClick, self.user_list[i][0],self.user_list[i][1]))
+
+
 
         #检查按钮是否可以点击
         self.btn_user_pre.setEnabled(False)
@@ -262,6 +270,48 @@ class Demo(QWidget,Manage_UI):
 
 
 
+
+    #删除用户按钮被点击
+    def userDeleteButtonOnClick(self,userid,username):
+        reply = QMessageBox(QMessageBox.Question, "删除用户", "您确定删除该用户吗？？\n 账号："+userid+" \n使用者："+username)
+        qyes = reply.addButton(self.tr("确定"), QMessageBox.YesRole)
+        qno = reply.addButton(self.tr("取消"), QMessageBox.NoRole)
+        reply.exec_()
+        if reply.clickedButton() == qyes:
+            sql = "delete from user where id ='" + str(userid) + "'"
+            query = QtSql.QSqlQuery(sql)
+            if query.numRowsAffected()>0:
+                box = QMessageBox(QMessageBox.Information, "删除成功", "您已成功删除该用户")
+                box.addButton(self.tr("确定"), QMessageBox.YesRole)
+                box.exec_()
+            self.user_currentPage=1
+            self.user_update(start_s=0, count_s=10)
+
+
+
+    '''修改用户权限部分操作'''
+    def userChangeLevelButtonOnClick(self,id,name):
+        if self.btn_user_change_level1.isChecked():
+            level=0
+            text="管理员"
+        else:
+            level=1
+            text="操作员"
+        reply = QMessageBox(QMessageBox.Question, "修改权限", "您确定修改该用户权限为 "+text+" 吗？？")
+        qyes = reply.addButton(self.tr("确定"), QMessageBox.YesRole)
+        qno = reply.addButton(self.tr("取消"), QMessageBox.NoRole)
+        reply.exec_()
+        if reply.clickedButton() == qyes:
+            sql="UPDATE user SET level = %d WHERE id = %s"%(level,id)
+            query = QtSql.QSqlQuery(sql)
+            if query.numRowsAffected()>0:
+                box = QMessageBox(QMessageBox.Information, "修改成功", "您已成功修改该用户权限")
+                box.addButton(self.tr("确定"), QMessageBox.YesRole)
+                box.exec_()
+            self.user_currentPage=1
+            self.user_update(start_s=0, count_s=10)
+
+
     ''' 添加新用户部分操作 '''
     #验证id是否重复
     def user_verify_id(self,text):
@@ -324,6 +374,7 @@ class Demo(QWidget,Manage_UI):
         sql = "insert into user values(\'"+new_id+"\',\'"+new_name+"\',"+str(new_level)+")"
         query = QtSql.QSqlQuery(sql)
         if query.numRowsAffected() > 0:
+            self.user_currentPage=1
             self.user_update(start_s=0, count_s=10)
             box = QMessageBox(QMessageBox.Information, "添加成功", "您已成功添加用户")
             box.addButton(self.tr("确定"), QMessageBox.YesRole)
@@ -338,6 +389,8 @@ if __name__=='__main__':
     sys.exit(app.exec_())
     # 关闭数据库
     db.close()
+
+
 
 
 

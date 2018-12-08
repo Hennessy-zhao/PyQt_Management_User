@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtSql import *
 from PyQt5 import QtWidgets,QtSql
+from functools import partial
 import sys
 
 class Manage_User_UI(QObject):
@@ -289,7 +290,7 @@ class Manage_User_UI(QObject):
         user_addLevel_icon=QLabel()
         user_addLevel_icon.setAlignment(Qt.AlignRight)
         user_addLevel_icon.setPixmap(QPixmap("./images/warn_1.png"))
-        user_addLevel_msg=QLabel("管理员: 可以登录后台系统和检测系统；\n操作员：只能登录检测系统")
+        user_addLevel_msg=QLabel("管理员: 可以登录管理界面和检测界面；\n操作员：只能登录检测系统")
         user_addLevel_msg.setMaximumWidth(200)
         user_addLevel_msg.setMinimumWidth(200)
         user_addLevel_msg.setWordWrap(True)
@@ -334,3 +335,73 @@ class Manage_User_UI(QObject):
 
 
         dialog.exec_()
+
+
+
+
+
+    # 显示修改用户权限的界面
+    def showChangeUserLevelDialog(self,id,name,level):
+        dialog = QDialog()
+
+        style = '''
+                    *{
+                        font-size:12pt;
+                        font: 12pt \"微软雅黑\";
+                    }
+
+                    QPushButton{
+                        padding:10px 20px;
+                        font-size:11pt;
+                    }
+
+                    '''
+        dialog.setStyleSheet(style)
+
+        # 设置logo
+        dialog.setWindowIcon(QIcon('./images/logo_1.png'))
+
+        dialog.setWindowTitle("修改用户权限")
+        dialog.setWindowModality(Qt.WindowModal)  # 设置窗口模态：窗口模态，程序在未处理完当前对话框时，将阻止和对话框的父窗口进行交互
+
+        layout=QVBoxLayout()
+        layout.setSpacing(30)
+        layout.setContentsMargins(30, 30, 30, 30)
+
+        layout.addWidget(QLabel("修改权限说明："))
+        layout.addWidget(QLabel("管理员：可以登录管理界面和检测界面"))
+        layout.addWidget(QLabel("操作员：只能登陆检测系统"))
+
+        layout.addWidget(QLabel("用户信息"))
+        layout.addWidget(QLabel("账号：" + str(id)))
+        layout.addWidget(QLabel("用户：" + str(name)))
+        layout.addWidget(QLabel("权限选择："))
+
+        #添加修改权限的单选按钮
+        hlayout=QHBoxLayout()
+        hlayout.setSpacing(20)
+        self.btn_user_change_level1=QRadioButton("管理员")
+        self.btn_user_change_level2=QRadioButton("操作员")
+        hlayout.addWidget(self.btn_user_change_level1)
+        hlayout.addWidget(self.btn_user_change_level2)
+        layout.addLayout(hlayout)
+
+        if level==0:
+            self.btn_user_change_level1.setChecked(True)
+        else:
+            self.btn_user_change_level2.setChecked(True)
+
+        hlayout2=QHBoxLayout()
+        hlayout2.setContentsMargins(0,20,0,0)
+        self.userChangeLevel=QPushButton("确认修改")
+        hlayout2.addWidget(self.userChangeLevel,Qt.AlignCenter)
+
+        #确认修改按钮被点击
+        self.userChangeLevel.clicked.connect(partial(self.userChangeLevelButtonOnClick, id,name))
+
+        layout.addLayout(hlayout2)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+
