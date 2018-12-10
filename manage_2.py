@@ -6,8 +6,8 @@ from PyQt5.QtSql import *
 from PyQt5 import QtSql
 from functools import partial
 from Manage_UI import Manage_UI
+from CommonHelper import CommonHelper
 import sys
-import qdarkstyle
 import re
 
 class Demo(QWidget,Manage_UI):
@@ -212,11 +212,6 @@ class Demo(QWidget,Manage_UI):
     # 跳转页面按钮被按下
     def userSearchPageOnClick(self):
         page=self.user_jump_page.text()
-        if page=='':
-            box1 = QMessageBox(QMessageBox.Warning, "输入为空", "页数不能为空")
-            box1.addButton(self.tr("确定"), QMessageBox.YesRole)
-            box1.exec_()
-            return False
         page=int(page)
         # 获取总页数
         page_count=self.get_user_pageCount()
@@ -240,11 +235,6 @@ class Demo(QWidget,Manage_UI):
         self.is_user_searchID=True
         self.is_user_searchName=False
         userID=self.search_userID.text()
-        if userID=='':
-            box = QMessageBox(QMessageBox.Warning, "输入为空", "用户账号不能为空")
-            box.addButton(self.tr("确定"), QMessageBox.YesRole)
-            box.exec_()
-            return False
         self.user_searchID_content=userID
         self.user_describe.setText("以下为您搜索的账号信息和 " + userID + " 有关的用户信息")
         # 修改当前页数
@@ -260,11 +250,6 @@ class Demo(QWidget,Manage_UI):
         self.is_user_searchID = False
         self.is_user_searchName = True
         userName = self.search_username.text()
-        if userName=='':
-            box = QMessageBox(QMessageBox.Warning, "输入为空", "用户姓名不能为空")
-            box.addButton(self.tr("确定"), QMessageBox.YesRole)
-            box.exec_()
-            return False
         self.user_searchName_content = userName
         self.user_describe.setText("以下为您搜索的姓名信息和 " + userName + " 有关的用户信息")
         # 修改当前页数
@@ -399,7 +384,9 @@ class Demo(QWidget,Manage_UI):
 if __name__=='__main__':
     app=QApplication(sys.argv)
     form=Demo()
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    styleFile = './manage.qss'
+    qssStyle = CommonHelper.readQss(styleFile)
+    app.setStyleSheet(qssStyle)
     form.showMaximized()
     sys.exit(app.exec_())
     # 关闭数据库
